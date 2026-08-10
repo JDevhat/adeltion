@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Download</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #111;
+      }
+
+      /* A 1920 x 1080 stage, scaled as a video player would be. */
+      .frame {
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stage {
+        position: relative;
+        width: 1920px;
+        height: 1080px;
+        flex: 0 0 auto;
+        overflow: hidden;
+        background: #111;
+        transform-origin: top left;
+      }
+
+      .content {
+        position: absolute;
+        top: 88px;
+        left: 260px; /* content centre: 400 px to the left of stage centre */
+        display: flex;
+        width: 600px;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .logo {
+        position: relative;
+        top: 50px;
+        width: 300px;
+        height: auto;
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .hero {
+        width: 600px;
+        height: auto;
+        margin-top: 70px;
+      }
+
+      .download-link {
+        display: block;
+        margin-top: 90px;
+      }
+
+      .download {
+        display: block;
+        width: 256px;
+        height: auto;
+        transition: transform 160ms ease;
+      }
+
+      .download:hover {
+        transform: scale(1.04);
+      }
+
+      .socials {
+        display: flex;
+        gap: 28px;
+        margin-top: 70px;
+      }
+
+      .socials a {
+        display: block;
+        transition: transform 160ms ease;
+      }
+
+      .socials a:hover {
+        transform: translateY(-5px);
+      }
+
+      .socials img {
+        display: block;
+        width: 64px;
+        height: 64px;
+      }
+
+      .media-gallery {
+        position: absolute;
+        top: 395px;
+        left: 1200px;
+        width: 720px;
+      }
+
+      .media-main {
+        position: relative;
+        width: 720px;
+        aspect-ratio: 16 / 9;
+        overflow: hidden;
+        border: 1px solid #464646;
+        background: #050505;
+        box-shadow: 0 12px 30px rgb(0 0 0 / 35%);
+      }
+
+      .media-main iframe,
+      .media-main img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        object-fit: cover;
+      }
+
+      .media-main img[hidden],
+      .media-main iframe[hidden] {
+        display: none;
+      }
+
+      .media-thumbnail-strip {
+        position: relative;
+        width: 720px;
+        margin-top: 14px;
+      }
+
+      .media-thumbnail-viewport {
+        width: 720px;
+        overflow: hidden;
+      }
+
+      .media-thumbnails {
+        display: flex;
+        gap: 12px;
+        width: max-content;
+        padding: 0;
+        list-style: none;
+        transition: transform 240ms ease;
+      }
+
+      .media-thumbnails button {
+        position: relative;
+        width: 132px;
+        height: 74px;
+        padding: 0;
+        overflow: hidden;
+        cursor: pointer;
+        border: 2px solid transparent;
+        background: #050505;
+        opacity: 0.65;
+        transition: border-color 150ms ease, opacity 150ms ease, transform 150ms ease;
+      }
+
+      .media-thumbnails button:hover,
+      .media-thumbnails button[aria-pressed="true"] {
+        border-color: #66c0f4;
+        opacity: 1;
+        transform: translateY(-3px);
+      }
+
+      .media-thumbnails img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .video-thumb::after {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        color: white;
+        content: '▶';
+        font-size: 25px;
+        text-shadow: 0 1px 5px #000;
+        background: rgb(0 0 0 / 25%);
+      }
+
+      .media-scroll {
+        position: absolute;
+        z-index: 1;
+        top: 50%;
+        width: 38px;
+        height: 74px;
+        padding: 0;
+        cursor: pointer;
+        border: 0;
+        color: #fff;
+        background: rgb(0 0 0 / 72%);
+        font-size: 30px;
+        line-height: 1;
+        transform: translateY(-50%);
+        transition: background 150ms ease;
+      }
+
+      .media-scroll:hover:not(:disabled) {
+        background: rgb(35 103 145 / 92%);
+      }
+
+      .media-scroll:disabled {
+        cursor: default;
+        opacity: 0.35;
+      }
+
+      .media-scroll-left {
+        left: 0;
+      }
+
+      .media-scroll-right {
+        right: 0;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(-30px);
+        }
+        50% {
+          transform: translateY(30px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="frame">
+      <main class="stage">
+        <section class="content">
+          <img class="logo" src="logo.png" alt="Logo" />
+          <img class="hero" src="image.png" alt="Main image" />
+
+          <a
+            class="download-link"
+            href="https://drive.google.com/file/d/1XpKTcDhsdo124UPNseH_vr8_--2gPF9l/view?usp=sharing"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <img class="download" src="download.png" alt="Download" />
+          </a>
+
+          <nav class="socials" aria-label="Links">
+            <a href="https://" aria-label="Link 1"><img src="ico1.png" alt="" /></a>
+            <a href="https://" aria-label="Link 2"><img src="ico2.png" alt="" /></a>
+            <a href="https://" aria-label="Link 3"><img src="ico3.png" alt="" /></a>
+          </nav>
+        </section>
+      </main>
+
+      <section class="media-gallery" aria-label="Видео и скриншоты">
+        <div class="media-main">
+          <iframe
+            id="video-player"
+            src="https://www.youtube-nocookie.com/embed/7rlDbq2i6DA?rel=0"
+            title="Видео с YouTube"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+          ></iframe>
+          <img id="screenshot-viewer" src="screenshots/20241218235907_1.jpg" alt="Скриншот" hidden />
+        </div>
+
+        <div class="media-thumbnail-strip">
+          <button class="media-scroll media-scroll-left" type="button" aria-label="Прокрутить миниатюры влево">‹</button>
+          <div class="media-thumbnail-viewport">
+            <ul class="media-thumbnails">
+              <li>
+                <button class="video-thumb" type="button" data-video aria-label="Открыть видео" aria-pressed="true">
+                  <img src="https://img.youtube.com/vi/7rlDbq2i6DA/hqdefault.jpg" alt="" />
+                </button>
+              </li>
+              <li><button type="button" data-image="screenshots/20241218235907_1.jpg" aria-label="Открыть скриншот 1" aria-pressed="false"><img src="screenshots/20241218235907_1.jpg" alt="" /></button></li>
+              <li><button type="button" data-image="screenshots/20250826143023_1.jpg" aria-label="Открыть скриншот 2" aria-pressed="false"><img src="screenshots/20250826143023_1.jpg" alt="" /></button></li>
+              <li><button type="button" data-image="screenshots/20251007001430_1.jpg" aria-label="Открыть скриншот 3" aria-pressed="false"><img src="screenshots/20251007001430_1.jpg" alt="" /></button></li>
+              <li><button type="button" data-image="screenshots/20260809004858_1.jpg" aria-label="Открыть скриншот 4" aria-pressed="false"><img src="screenshots/20260809004858_1.jpg" alt="" /></button></li>
+              <li><button type="button" data-image="screenshots/20260811013749_1.jpg" aria-label="Открыть скриншот 5" aria-pressed="false"><img src="screenshots/20260811013749_1.jpg" alt="" /></button></li>
+            </ul>
+          </div>
+          <button class="media-scroll media-scroll-right" type="button" aria-label="Прокрутить миниатюры вправо">›</button>
+        </div>
+      </section>
+    </div>
+    <script>
+      const frame = document.querySelector('.frame');
+      const stage = document.querySelector('.stage');
+
+      function fitStage() {
+        const scale = Math.min(window.innerWidth / 1920, window.innerHeight / 1080);
+        frame.style.width = `${1920 * scale}px`;
+        frame.style.height = `${1080 * scale}px`;
+        stage.style.transform = `scale(${scale})`;
+      }
+
+      window.addEventListener('resize', fitStage);
+      fitStage();
+
+      const player = document.querySelector('#video-player');
+      const screenshotViewer = document.querySelector('#screenshot-viewer');
+      const thumbnails = document.querySelectorAll('.media-thumbnails button');
+
+      thumbnails.forEach((thumbnail) => {
+        thumbnail.addEventListener('click', () => {
+          const isVideo = thumbnail.hasAttribute('data-video');
+          player.hidden = !isVideo;
+          screenshotViewer.hidden = isVideo;
+
+          if (!isVideo) {
+            screenshotViewer.src = thumbnail.dataset.image;
+          }
+
+          thumbnails.forEach((item) => item.setAttribute('aria-pressed', String(item === thumbnail)));
+        });
+      });
+
+      const thumbnailTrack = document.querySelector('.media-thumbnails');
+      const thumbnailViewport = document.querySelector('.media-thumbnail-viewport');
+      const scrollLeftButton = document.querySelector('.media-scroll-left');
+      const scrollRightButton = document.querySelector('.media-scroll-right');
+      let thumbnailOffset = 0;
+
+      function updateThumbnailScroll() {
+        const maximumOffset = Math.max(0, thumbnailTrack.scrollWidth - thumbnailViewport.clientWidth);
+        thumbnailOffset = Math.min(Math.max(0, thumbnailOffset), maximumOffset);
+        thumbnailTrack.style.transform = `translateX(${-thumbnailOffset}px)`;
+        scrollLeftButton.disabled = thumbnailOffset === 0;
+        scrollRightButton.disabled = thumbnailOffset === maximumOffset;
+      }
+
+      scrollLeftButton.addEventListener('click', () => {
+        thumbnailOffset -= 288;
+        updateThumbnailScroll();
+      });
+
+      scrollRightButton.addEventListener('click', () => {
+        thumbnailOffset += 288;
+        updateThumbnailScroll();
+      });
+
+      updateThumbnailScroll();
+
+    </script>
+  </body>
+</html>
