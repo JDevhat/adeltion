@@ -144,9 +144,16 @@
       .media-thumbnail-viewport {
         width: 720px;
         overflow: hidden;
+        cursor: grab;
+        touch-action: pan-y;
+      }
+
+      .media-thumbnail-viewport.is-dragging {
+        cursor: grabbing;
       }
 
       .media-thumbnails {
+        position: relative;
         display: flex;
         gap: 12px;
         width: max-content;
@@ -231,10 +238,10 @@
       @keyframes float {
         0%,
         100% {
-          transform: translateY(70px);
+          transform: translateY(-80px);
         }
         50% {
-          transform: translateY(130px);
+          transform: translateY(-20px);
         }
       }
 
@@ -372,6 +379,7 @@
               <li><button type="button" data-image="screenshots/20251007001430_1.jpg" aria-label="Открыть скриншот 3" aria-pressed="false"><img src="screenshots/20251007001430_1.jpg" alt="" /></button></li>
               <li><button type="button" data-image="screenshots/20260809004858_1.jpg" aria-label="Открыть скриншот 4" aria-pressed="false"><img src="screenshots/20260809004858_1.jpg" alt="" /></button></li>
               <li><button type="button" data-image="screenshots/20260811013749_1.jpg" aria-label="Открыть скриншот 5" aria-pressed="false"><img src="screenshots/20260811013749_1.jpg" alt="" /></button></li>
+              <li><button type="button" data-image="screenshots/2026-05-24 173601.png" aria-label="Открыть скриншот 5" aria-pressed="false"><img src="screenshots/2026-05-24 173601.png" alt="" /></button></li>
             </ul>
           </div>
           <button class="media-scroll media-scroll-right" type="button" aria-label="Прокрутить миниатюры вправо">›</button>
@@ -405,43 +413,95 @@
       const screenshotViewer = document.querySelector('#screenshot-viewer');
       const thumbnails = document.querySelectorAll('.media-thumbnails button');
 
-      thumbnails.forEach((thumbnail) => {
-        thumbnail.addEventListener('click', () => {
-          const isVideo = thumbnail.hasAttribute('data-video');
-          player.hidden = !isVideo;
-          screenshotViewer.hidden = isVideo;
-
-          if (!isVideo) {
-            screenshotViewer.src = thumbnail.dataset.image;
-          }
-
-          thumbnails.forEach((item) => item.setAttribute('aria-pressed', String(item === thumbnail)));
-        });
-      });
-
       const thumbnailTrack = document.querySelector('.media-thumbnails');
       const thumbnailViewport = document.querySelector('.media-thumbnail-viewport');
       const scrollLeftButton = document.querySelector('.media-scroll-left');
       const scrollRightButton = document.querySelector('.media-scroll-right');
       let thumbnailOffset = 0;
+      let dragStartX = 0;
+      let dragStartOffset = 0;
+      let pointerIsDown = false;
+      let didDrag = false;
+      let ignoreClickUntil = 0;
 
       function updateThumbnailScroll() {
         const maximumOffset = Math.max(0, thumbnailTrack.scrollWidth - thumbnailViewport.clientWidth);
         thumbnailOffset = Math.min(Math.max(0, thumbnailOffset), maximumOffset);
         thumbnailTrack.style.transform = `translateX(${-thumbnailOffset}px)`;
-        scrollLeftButton.disabled = thumbnailOffset === 0;
-        scrollRightButton.disabled = thumbnailOffset === maximumOffset;
       }
 
-      scrollLeftButton.addEventListener('click', () => {
-        thumbnailOffset -= 288;
+      function makeThumbnailVisible(thumbnail) {
+        const thumbnailStart = thumbnail.offsetLeft;
+        const thumbnailEnd = thumbnailStart + thumbnail.offsetWidth;
+        const viewportEnd = thumbnailOffset + thumbnailViewport.clientWidth;
+
+        if (thumbnailStart < thumbnailOffset) {
+          thumbnailOffset = thumbnailStart;
+        } else if (thumbnailEnd > viewportEnd) {
+          thumbnailOffset = thumbnailEnd - thumbnailViewport.clientWidth;
+        }
+        updateThumbnailScroll();
+      }
+
+      function activateThumbnail(thumbnail) {
+        const isVideo = thumbnail.hasAttribute('data-video');
+        player.hidden = !isVideo;
+        screenshotViewer.hidden = isVideo;
+
+        if (!isVideo) {
+          screenshotViewer.src = thumbnail.dataset.image;
+        }
+
+        thumbnails.forEach((item) => item.setAttribute('aria-pressed', String(item === thumbnail)));
+        makeThumbnailVisible(thumbnail);
+      }
+
+      thumbnails.forEach((thumbnail) => {
+        thumbnail.addEventListener('click', () => activateThumbnail(thumbnail));
+      });
+
+      function activateRelativeThumbnail(direction) {
+        const activeIndex = Array.from(thumbnails).findIndex((item) => item.getAttribute('aria-pressed') === 'true');
+        const nextIndex = (activeIndex + direction + thumbnails.length) % thumbnails.length;
+        activateThumbnail(thumbnails[nextIndex]);
+      }
+
+      scrollLeftButton.addEventListener('click', () => activateRelativeThumbnail(-1));
+      scrollRightButton.addEventListener('click', () => activateRelativeThumbnail(1));
+
+      thumbnailViewport.addEventListener('pointerdown', (event) => {
+        pointerIsDown = true;
+        didDrag = false;
+        dragStartX = event.clientX;
+        dragStartOffset = thumbnailOffset;
+        thumbnailViewport.classList.add('is-dragging');
+      });
+
+      thumbnailViewport.addEventListener('pointermove', (event) => {
+        if (!pointerIsDown) return;
+
+        const distance = event.clientX - dragStartX;
+        if (Math.abs(distance) <= 5 && !didDrag) return;
+
+        if (!didDrag) thumbnailViewport.setPointerCapture(event.pointerId);
+        didDrag = true;
+        thumbnailOffset = dragStartOffset - distance;
         updateThumbnailScroll();
       });
 
-      scrollRightButton.addEventListener('click', () => {
-        thumbnailOffset += 288;
-        updateThumbnailScroll();
-      });
+      function finishThumbnailDrag() {
+        if (didDrag) ignoreClickUntil = Date.now() + 350;
+        pointerIsDown = false;
+        thumbnailViewport.classList.remove('is-dragging');
+      }
+
+      thumbnailViewport.addEventListener('pointerup', finishThumbnailDrag);
+      thumbnailViewport.addEventListener('pointercancel', finishThumbnailDrag);
+      thumbnailViewport.addEventListener('click', (event) => {
+        if (Date.now() > ignoreClickUntil) return;
+        event.preventDefault();
+        event.stopPropagation();
+      }, true);
 
       updateThumbnailScroll();
 
